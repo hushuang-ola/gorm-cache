@@ -33,7 +33,7 @@ func NewWithDb(tx *redis.Client) *Store {
 // @param value
 // @param ttl
 // @date 2022-07-02 08:12:11
-func (r *Store) Set(ctx context.Context, key string, value any, ttl time.Duration) error {
+func (r *Store) Set(ctx context.Context, key string, value interface{}, ttl time.Duration) error {
 	return r.store.Set(ctx, key, value, ttl).Err()
 }
 
@@ -54,7 +54,11 @@ func (r *Store) RemoveFromTag(ctx context.Context, tag string) error {
 	if err != nil {
 		return err
 	}
-
+	ks:=make([]interface{},0,len(keys))
+	for _, key := range keys {
+		ks=append(ks,key)
+	}
+	r.store.SRem(ctx,tag,ks...)
 	return r.store.Del(ctx, keys...).Err()
 }
 

@@ -2,9 +2,7 @@ package cache
 
 import (
 	"context"
-	"hash/fnv"
 	"os"
-	"strconv"
 	"time"
 
 	"gorm.io/gorm"
@@ -21,14 +19,14 @@ type Config struct {
 
 type (
 	Serializer interface {
-		Serialize(v any) ([]byte, error)
+		Serialize(v interface{}) ([]byte, error)
 
-		Deserialize(data []byte, v any) error
+		Deserialize(data []byte, v interface{}) error
 	}
 
 	Store interface {
 		// Set 写入缓存数据
-		Set(ctx context.Context, key string, value any, ttl time.Duration) error
+		Set(ctx context.Context, key string, value interface{}, ttl time.Duration) error
 
 		// Get 获取缓存数据
 		Get(ctx context.Context, key string) ([]byte, error)
@@ -87,10 +85,10 @@ func (p *Cache) Initialize(tx *gorm.DB) error {
 // @param key
 // @date 2022-07-02 08:09:46
 func generateKey(key string) string {
-	hash := fnv.New64a()
-	_, _ = hash.Write([]byte(key))
+	//hash := fnv.New64a()
+	//_, _ = hash.Write([]byte(key))
 
-	return strconv.FormatUint(hash.Sum64(), 36)
+	return key
 }
 
 // Query
@@ -166,7 +164,7 @@ func (p *Cache) QueryDB(tx *gorm.DB) {
 // @param ctx
 // @param key
 // @param dest
-func (p *Cache) QueryCache(ctx context.Context, key string, dest any) error {
+func (p *Cache) QueryCache(ctx context.Context, key string, dest interface{}) error {
 	values, err := p.store.Get(ctx, key)
 	if err != nil {
 		return err
@@ -176,7 +174,7 @@ func (p *Cache) QueryCache(ctx context.Context, key string, dest any) error {
 }
 
 // SaveCache 写入缓存数据
-func (p *Cache) SaveCache(ctx context.Context, key string, dest any, ttl time.Duration) error {
+func (p *Cache) SaveCache(ctx context.Context, key string, dest interface{}, ttl time.Duration) error {
 	values, err := p.Serializer.Serialize(dest)
 	if err != nil {
 		return err

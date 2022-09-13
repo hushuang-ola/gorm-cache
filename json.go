@@ -7,7 +7,7 @@ type DefaultJSONSerializer struct{}
 // Serialize
 // @param v
 // @date 2022-07-02 08:12:26
-func (d *DefaultJSONSerializer) Serialize(v any) ([]byte, error) {
+func (d *DefaultJSONSerializer) Serialize(v interface{}) ([]byte, error) {
 	return json.Marshal(v)
 }
 
@@ -15,6 +15,6 @@ func (d *DefaultJSONSerializer) Serialize(v any) ([]byte, error) {
 // @param data
 // @param v
 // @date 2022-07-02 08:12:25
-func (d *DefaultJSONSerializer) Deserialize(data []byte, v any) error {
+func (d *DefaultJSONSerializer) Deserialize(data []byte, v interface{}) error {
 	return json.Unmarshal(data, v)
 }

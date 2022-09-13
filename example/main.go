@@ -21,7 +21,7 @@ var (
 )
 
 func newDb() {
-	dsn := "root:123456@tcp(127.0.0.1:3306)/gorm?charset=utf8&parseTime=True&loc=Local"
+	dsn := "root:123456@tcp(127.0.0.1:3306)/flock?charset=utf8&parseTime=True&loc=Local"
 	var err error
 
 	db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
@@ -30,7 +30,7 @@ func newDb() {
 		return
 	}
 
-	redisClient = redis.NewClient(&redis.Options{Addr: ":6379"})
+	redisClient = redis.NewClient(&redis.Options{Addr: ":6379",DB: 10})
 
 	cacheConfig := &cache.Config{
 		Store:      redis2.NewWithDb(redisClient), // OR redis2.New(&redis.Options{Addr:"6379"})
@@ -46,47 +46,47 @@ func newDb() {
 }
 
 func basic() {
-	var username string
+	var name string
 	ctx := context.Background()
 	ctx = cache.NewExpiration(ctx, time.Hour)
 
-	db.Table("users").WithContext(ctx).Where("id = 1").Limit(1).Pluck("username", &username)
-	fmt.Println(username)
+	db.Table("users").WithContext(ctx).Where("id = 11642759").Limit(1).Pluck("name", &name)
+	fmt.Println(name)
 	// output gorm
 }
 
 func customKey() {
-	var nickname string
+	var name string
 	ctx := context.Background()
 	ctx = cache.NewExpiration(ctx, time.Hour)
-	ctx = cache.NewKey(ctx, "nickname")
+	ctx = cache.NewKey(ctx, "name")
 
-	db.Table("users").WithContext(ctx).Where("id = 1").Limit(1).Pluck("nickname", &nickname)
+	db.Table("users").WithContext(ctx).Where("id = 11642759").Limit(1).Pluck("name", &name)
 
-	fmt.Println(nickname)
+	fmt.Println(name)
 	// output gormwithmysql
 }
 
 func useTag() {
-	var nickname string
+	var name string
 	ctx := context.Background()
 	ctx = cache.NewExpiration(ctx, time.Hour)
 	ctx = cache.NewTag(ctx, "users")
 
-	db.Table("users").WithContext(ctx).Where("id = 1").Limit(1).Pluck("nickname", &nickname)
+	db.Table("users").WithContext(ctx).Where("id = 11642759").Limit(1).Pluck("name", &name)
 
-	fmt.Println(nickname)
+	fmt.Println(name)
 	// output gormwithmysql
 }
 
 func main() {
 	newDb()
-	basic()
-	customKey()
+	//basic()
+	//customKey()
 	useTag()
 
 	ctx := context.Background()
 	fmt.Println(redisClient.Keys(ctx, "*").Val())
 
-	fmt.Println(cachePlugin.RemoveFromTag(ctx, "users"))
+	//fmt.Println(cachePlugin.RemoveFromTag(ctx, "users"))
 }
